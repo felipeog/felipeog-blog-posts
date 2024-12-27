@@ -1,0 +1,25 @@
+name: Reminder
+
+on:
+  schedule:
+    - cron: "0 9 * * 6" # Saturday at 6 AM GMT-3 (converted to UTC: 9 AM)
+    - cron: "0 9 * * 0" # Sunday at 6 AM GMT-3 (converted to UTC: 9 AM)
+  workflow_dispatch:
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Run reminder script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/reminder.js
