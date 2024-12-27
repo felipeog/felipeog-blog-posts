@@ -1,6 +1,4 @@
-console.log(process.env);
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const PAT_TOKEN = process.env.PAT_TOKEN;
 const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split("/");
 const today = new Date().toISOString().split("T")[0];
 
@@ -40,14 +38,13 @@ async function getIssues() {
     `  }` +
     `}`;
   const response = await fetch("https://api.github.com/graphql", {
-    headers: { Authorization: `Bearer ${GITHUB_TOKEN}` },
+    headers: { Authorization: `Bearer ${PAT_TOKEN}` },
     method: "POST",
     body: JSON.stringify({ query }),
   });
   const json = await response.json();
 
   if (json?.errors) {
-    console.dir(json.errors, { depth: null });
     throw new Error("Query error.");
   }
 
@@ -83,7 +80,7 @@ async function getIssues() {
 async function addComment(issueNumber, comment) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issueNumber}/comments`;
   await fetch(url, {
-    headers: { Authorization: `Bearer ${GITHUB_TOKEN}` },
+    headers: { Authorization: `Bearer ${PAT_TOKEN}` },
     method: "POST",
     body: JSON.stringify({ body: comment }),
   });
@@ -100,7 +97,10 @@ function isDateBetween(date, start, end) {
 async function reminder() {
   try {
     const issues = await getIssues();
-    console.dir(issues, { depth: null });
+
+    if (!issues.length) {
+      return console.log("No issues found.");
+    }
 
     for (const issue of issues) {
       if (!isDateBetween(today, issue.start, issue.end)) {
