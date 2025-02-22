@@ -1,6 +1,5 @@
 const PAT_TOKEN = process.env.PAT_TOKEN;
 const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split("/");
-const today = new Date().toISOString().split("T")[0];
 
 async function getIssues() {
   const query =
@@ -66,8 +65,8 @@ async function getIssues() {
         id: item.id,
         title: item.content.title,
         number: item.content.number,
-        start: start.date,
-        end: end.date,
+        start: start?.date,
+        end: end?.date,
       });
     });
 
@@ -86,8 +85,10 @@ async function addComment(issueNumber, comment) {
   });
 }
 
-function isDateBetween(date, start, end) {
-  const currentDate = new Date(date);
+function isTodayBetween(start, end) {
+  if (!start || !end) return false; 
+
+  const currentDate = new Date().toISOString().split("T")[0];
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -103,7 +104,7 @@ async function reminder() {
     }
 
     for (const issue of issues) {
-      if (!isDateBetween(today, issue.start, issue.end)) {
+      if (!isTodayBetween(issue.start, issue.end)) {
         console.log(`No comments for issue #${issue.number}: ${issue.title}`);
         continue;
       }
